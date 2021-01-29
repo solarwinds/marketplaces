@@ -208,7 +208,7 @@ if ($BuildPackage) {
 
     $date = Get-Date -Format "yyyy_MM_dd"
     Get-ChildItem -Path $WorkFolder -Exclude $AzureDeployParametersFileNameExclude |
-    Compress-Archive -DestinationPath "$outputPath\$Product-$date.zip" -Update
+    Compress-Archive -DestinationPath "$outputPath\$Product-$date.zip" -Force
     exit
 }
 

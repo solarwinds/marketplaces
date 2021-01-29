@@ -1,0 +1,58 @@
+name: Cleanup
+description: This document cleans the AMI.
+schemaVersion: 1.0
+
+constants:
+  - Utils:
+      type: string
+      value: C:\__utils__
+
+phases:
+  - 
+    name: 'build'
+    steps:
+      -
+        name: CreateUtilsFolder
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - New-Item -Path '{{ Utils }}' -ItemType Directory
+      - 
+        name: DownloadCode
+        action: S3Download
+        onFailure: Abort
+        maxAttempts: 3
+        inputs:
+          - 
+            source: s3://solarwinds-orion-marketplace/utils/*
+            destination: '{{ Utils }}'
+      -
+        name: Clear filesystem
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Get-Item "C:\TOE_*" | ForEach-Object { {{ Utils }}\sdelete64.exe /accepteula -s $_ }
+            - Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }
+            - |
+              $t = @("C:\Windows\Temp\*", "C:\Windows\Prefetch\*", "C:\Users\*\Appdata\Local\Temp\*")
+              $t | ForEach-Object { {{ Utils }}\sdelete64.exe /accepteula -s $_ }
+            - Remove-Item '{{ Utils }}' -force -recurse  
+  - 
+    name: 'validate'
+    steps:
+      - 
+        name: CheckFiles
+        action: ExecutePowerShell
+        onFailure: Abort
+        inputs:
+          commands:
+            -
+              if (Test-Path '{{ Utils }}') {
+                exit 1
+              }
+
+              if ((Get-ChildItem "C:\TOE_*" | Measure-Object).Count -ne 0) {
+                exit 2
+              }
+
+              exit 0

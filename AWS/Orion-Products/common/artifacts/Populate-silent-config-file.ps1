@@ -1,15 +1,17 @@
 param
 (
-    [string] $installerParameter,
-    [hashtable] $templateParameters
+    [string] $installerParameter
 )
 
-Start-Transcript -Path C:\cfn\configuration.Log
+Start-Transcript -Path C:\cfn\OrionInstallBootstrap.Log
+
 Add-Type -AssemblyName System.Web # required for password generation
+
+$TemplateParametersXmlFileLocation = "C:\cfn\artifacts\InstallerConfig.xml"
+$templateParameters = Import-Clixml -Path $TemplateParametersXmlFileLocation
 
 $artifactsFolder = "C:\cfn\artifacts"
 $configfilePath = "$artifactsFolder\standard.xml"
-$passwordFile = "$artifactsFolder\orionadmin_password.txt"
 $installerFile = "$artifactsFolder\solarwindInstaller.ps1"
 
 $xml = New-Object XML
@@ -172,18 +174,13 @@ Write-Host 'Configuration file updated....'; [datetime]::Now
 Write-Host 'Creating CheckHealthScript Task ....'; [datetime]::Now
 
 #Creating new User with user name 'orionadmin' through which schedular task will be created and run using that user.
-[System.Web.Security.Membership]::GeneratePassword(14, 2) | Out-File -FilePath $passwordFile -Force
-$password = Get-Content -Path $passwordFile
+$password = [System.Web.Security.Membership]::GeneratePassword(14, 2)
 net user 'orionadmin' $password /add /comment:"orion  installer" /fullname:"Orion Admin" /passwordchg:NO
-#Adding the new user to the 'Administrators' group
 net localgroup Administrators /add 'orionadmin'
 Write-Host 'User (orionadmin) Added to Administrators'
 
-$stackName = $templateParameters['awsStackName']
-$stackRegion = $templateParameters['awsStackRegion']
 $scheduledTime = (Get-Date).AddMinutes(1).ToString("HH:mm")
-
-schtasks /CREATE /TN CheckHealthScript /TR "powershell.exe -ExecutionPolicy Unrestricted  -file '$installerFile' $stackName $stackRegion $installerParameter" /RL HIGHEST /SC ONCE /ST $scheduledTime /RU 'orionadmin' /RP $password
+schtasks /CREATE /TN CheckHealthScript /TR "powershell.exe -ExecutionPolicy Unrestricted  -file '$installerFile' $installerParameter" /RL HIGHEST /SC ONCE /ST $scheduledTime /RU 'orionadmin' /RP $password
 
 Write-Host 'Created CheckHealthScript Task ....'; [datetime]::Now
 Stop-Transcript

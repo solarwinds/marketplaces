@@ -63,7 +63,8 @@ function Invoke-Request {
 	while (($Success -ne $true) -and ($Tries -lt $MaximumRetryCount)) 
 }
 
-Start-Transcript -Path C:\postinstall.Log
+$logFile = 'C:\Windows\Temp\OrionInstallBootstrap.log'
+Start-Transcript -Path $logFile
 
 # Download the silent installer config file from Artifacts
 Write-Host "Downloading silent installer config file from $silentConfigUri"; [datetime]::Now
@@ -217,10 +218,17 @@ Write-Host 'Deleting files created in installation process'; [datetime]::Now
 
 $installer_file = "C:\Windows\Temp\installer.ps1"
 if (Test-Path $installer_file) {
-	Remove-Item $installer_file
+	Remove-Item $installer_file -Force
 	Write-Host 'Silent installer file deleted'; [datetime]::Now
+}
+
+if (Test-Path $configfilePath) {
+	Remove-Item $configfilePath -Force
+	Write-Host 'Silent config file deleted'; [datetime]::Now
 }
 
 Write-Host 'Temporary files have been deleted'; [datetime]::Now 
 
 Stop-Transcript
+
+(Get-Content -Path $logFile -ReadCount 0) -replace '^Host Application:.*$' | Set-Content -Path $logFile -Force # Remove Host Application line

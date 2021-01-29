@@ -1,0 +1,47 @@
+project:
+  name: "orion-marketplace"
+  s3_bucket: taskcat-orion-test
+  parameters:
+    AllocatedStorage: 250
+    DBInstallationTypeParameter: "Option 1: Create a new database"
+    DBNameParameter: orion
+    DBPassword: {DBPASSWORD}
+    DBServerNameParameter: Please enter a Fully Qualified Domain Name (FQDN) of SQL Server
+    DBUserName: OrionDbUser
+    EC2InstanceTypeParameter: m5.xlarge
+    Password: {PASSWORD}
+    ServerAccesslocation: 0.0.0.0/0
+    SupportScalability: "No"
+    ScalabilityAccessLocation: "-"
+    KeyName: {KEY}
+    VolumeParameterType: gp2 (General purpose SSD volume that balances price and performance for a wide variety of workloads)
+    VolumeSize: 250
+    WindowOSTypeParameter: Windows Server 2019 Datacenter
+tests:
+  npm-virginia:
+    regions:
+      - us-east-1
+    template: ./npm/templates/npm.cfn.json
+    parameters: 
+      VPCID: vpc-40d8903a
+      Subnet: subnet-63af9304
+      DatabaseSubnets: subnet-63af9304,subnet-24330b78
+  la-bahrain:
+    regions:
+      - me-south-1
+    template: ./la/templates/la.cfn.json
+    regions:
+        - me-south-1
+    parameters:
+      Subnet: subnet-0ec62c67
+      VPCID: vpc-c1c72da8
+      DatabaseSubnets: subnet-0ec62c67,subnet-3544504d
+  nta-bahrain:
+    regions:
+    - me-south-1
+    template: ./nta/templates/nta.cfn.json
+    parameters:
+      Subnet: subnet-0ec62c67
+      VPCID: vpc-c1c72da8
+      DatabaseSubnets: subnet-0ec62c67,subnet-3544504d
+  

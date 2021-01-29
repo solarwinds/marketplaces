@@ -1,24 +1,16 @@
 param
 (
-    $stackName,
-    $stackRegion,
     $installerParameter
 )
-Start-Transcript -Path C:\cfn\SolarwindInstallationStatusLog.Log
+
+Start-Transcript -Path C:\cfn\OrionInstallStatus.Log
+
+$TemplateParametersXmlFileLocation = "C:\cfn\artifacts\InstallerConfig.xml"
+$templateParameters = Import-Clixml -Path $TemplateParametersXmlFileLocation
+$stackName = $templateParameters['awsStackName']
+$stackRegion = $templateParameters['awsStackRegion']
 
 $InstallerName = 'SolarWinds.Orion.Installer'
-$Exclusions = @('C:\Inetpub\SolarWinds',
-    'C:\ProgramData\SolarWinds',
-    'C:\Program Files (x86)\Common Files\SolarWinds'
-    'C:\Program Files (x86)\SolarWinds',
-    'C:\Windows\Temp\SolarWinds',
-    'C:\Windows\Temp\JET*.tmp')
-Write-Host "Adding Windows Defender exclusions for SolarWinds Orion"
-
-foreach ($Exclusion in $Exclusions) {
-    Add-MpPreference -ExclusionPath $Exclusion
-}
-
 $arguments = @{
     FilePath = "C:\cfn\artifacts\$InstallerName.exe"
     ArgumentList = '/s', '/ConfigFile="C:\cfn\artifacts\standard.xml"'
@@ -111,4 +103,10 @@ while (1) {
         break;
     }
 }
+
+# Cleanup
+net user 'orionadmin' /DELETE
+Remove-Item -Path "C:\cfn\artifacts" -Recurse -Force
+
 Stop-Transcript
+

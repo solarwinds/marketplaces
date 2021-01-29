@@ -4,11 +4,11 @@
    "Parameters":{
       "Password":{
          "Type":"String",
-         "Description":"The password will be used for the Orion Web Console admin user. Minimum 8 characters and must contain characters from three of the following categories English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (@,!, $, #, %, etc.) ",
+         "Description":"The password will be used for the Orion Web Console admin user. Minimum 10 characters and must contain characters from three of the following categories: alphabetic characters, numbers (0-9), and non-alphanumeric characters (@,!, $, #, %, etc.) except of ' (single quote).",
          "NoEcho":"true",
-         "MinLength":"12",
-         "AllowedPattern":"((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{12,20})",
-         "ConstraintDescription":"Your password must be at least 12 characters in length. Your password must contain characters from three of the following categories ? English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.)"
+         "MinLength":"10",
+         "AllowedPattern":"^(((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[A-Z])(?=.*[~`!@#$%^&*()_\\-+=\\[\\{\\]\\}\\\\|;:\",<.>/?]))|((?=.*[a-z])(?=.*[0-9])(?=.*[~`!#@$%^&*()_\\-+=\\[\\{\\]\\}\\\\|;:\",<.>/?]))|((?=.*[A-Z])(?=.*[0-9])(?=.*[~`!@#$%^&*()_\\-+=\\[\\{\\]\\}\\\\|;:\",<.>/?])))[\\w~`!@#$%^&*()_\\-+=\\[\\{\\]\\}\\\\|;:\",<.>/?]{10,50}$",
+         "ConstraintDescription":"Your password must be at least 10 characters in length. Maximum password length 50 characters. Your password must contain characters from three of the following categories: alphabetic characters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.) except of ' (single quote)."
       },
       "EOCProduct": {
          "Type": "String",
@@ -24,15 +24,14 @@
          "ConstraintDescription":"Please select an existing EC2 Key Pair from the dropdown."
       },
       "EC2InstanceTypeParameter":{
-         "Description":"Recommended size: m4.2xlarge - 8 vCPUs, 32 GB Memory",
+         "Description":"Recommended size: m5.xlarge - 4 vCPUs, 16 GB Memory",
          "Type":"String",
-         "Default":"m4.xlarge",
+         "Default":"m5.xlarge",
          "AllowedValues":[
-            "m4.large",
-            "m4.xlarge",
-            "m4.2xlarge",
-            "m5d.2xlarge",
-            "m5.2xlarge"
+            "m5.large",
+            "m5.xlarge",
+            "m5.2xlarge",
+            "m5d.2xlarge"
          ]
       },
       "WindowOSTypeParameter":{
@@ -44,12 +43,12 @@
          ]
       },
       "ServerAccesslocation":{
-         "Description":"IP address '0.0.0.0/0' allows everyone to access this EC2 instance. Please enter a valid address range (in a CIDR format) to limit the range of IP addresses which can access this EC2 instance.",
+         "Description":"IP address '0.0.0.0/0' allows everyone to access this EC2 instance. Please enter a valid IP address range in CIDR notation to limit the range of IP addresses that can access this EC2 instance.",
          "Type":"String",
          "MinLength":"9",
          "MaxLength":"18",
-         "AllowedPattern":"(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-         "ConstraintDescription":"Must be a valid IP CIDR range in a 'X.X.X.X/X' format."
+         "AllowedPattern":"^(([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}/(3[0-2]|[1-2]\\d|\\d))$|^(0\\.0\\.0\\.0/0)$",
+         "ConstraintDescription":"Must be a valid IP address range in CIDR notation (e.g. '0.0.0.0/0', '192.168.1.1/32', ...)."
       },
       "VolumeParameterType":{
          "Type":"String",
@@ -82,10 +81,10 @@
          "ConstraintDescription":"Please select a subnet for EC2 instance from the dropdown."
       },
       "DatabaseSubnets": {
-       "AllowedPattern":".+",
-       "Description": "The selected VPC should contain at least 2 subnets in a different availablity zones. This is not required in case of an existing database server instance.",
-       "Type": "List<AWS::EC2::Subnet::Id>",
-       "ConstraintDescription":"Please select at least 2 subnets from the dropdown."
+         "AllowedPattern":".+",
+         "Description": "The selected VPC should contain at least 2 subnets in a different availablity zones. This is not required in case of an existing database server instance.",
+         "Type": "List<AWS::EC2::Subnet::Id>",
+         "ConstraintDescription":"Please select at least 2 subnets from the dropdown."
        },
       "SupportScalability":{
          "Description":"Any Additional Polling Engine (APE) or Additional Web Server (AWS) which can be deployed on-premises or in the cloud. Running on a separate server that extends the monitoring capacity of your SolarWinds installation.",
@@ -103,7 +102,7 @@
       "DBInstallationTypeParameter":{
          "Type":"String",
          "Default":"Option 1: Create a new database",
-         "Description": "Orion will create a 'db.m4.large' Microsoft SQL Server database which is recommended for most evaluations. Upgrading the database server may be done at any time through the AWS Console and does not require any changes to Orion.",
+         "Description": "Orion will create a 'db.m5.large' Microsoft SQL Server database which is recommended for most evaluations. Upgrading the database server may be done at any time through the AWS Console and does not require any changes to Orion.",
          "AllowedValues":[
             "Option 1: Create a new database",
             "Option 2: Use an existing database"
@@ -126,28 +125,30 @@
       },
       "DBNameParameter":{
          "Type":"String",
-         "Description":"Only letters (a-z, A-Z) and numbers (0-9) are allowed.",
+         "Description":"Only letters (a-z, A-Z), numbers (0-9), '-' and '_' characters are allowed.",
          "NoEcho":"false",
-         "AllowedPattern":"^[A-Za-z0-9_-]*$",
+         "AllowedPattern":"^[A-Za-z0-9_-]+$",
          "MinLength":"1",
+         "MaxLength":"128",
          "ConstraintDescription":"The Database Name cannot be empty. Only letters (a-z, A-Z) and numbers (0-9) are allowed."
       },
       "DBUserName":{
          "Type":"String",
          "Description":"First character must be a letter. Only letters (a-z, A-Z) and numbers (0-9) are allowed.",
          "NoEcho":"true",
-         "AllowedPattern":"[a-zA-Z][a-zA-Z0-9]*",
-         "MinLength":"1",
-         "MaxLength":"16",
-         "ConstraintDescription":"Provide 1 to 16 alphanumeric characters. First character must be a letter. Only letters (a-z, A-Z) and numbers (0-9) are allowed."
+         "AllowedPattern":"^[a-zA-Z][a-zA-Z0-9]*$",
+         "MinLength":"3",
+         "MaxLength":"79",
+         "ConstraintDescription":"Provide 3 to 79 alphanumeric characters. First character must be a letter. Only letters (a-z, A-Z) and numbers (0-9) are allowed."
       },
       "DBPassword":{
          "Type":"String",
-         "Description":"Minimum 8 characters. The following characters are not allowed: / (slash), \" (double quote) and @ (at sign).",
+         "Description":"Minimum 8 characters. Your password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.) except of: @ (at sign), / (slash), ' (single quote), and \" (double quote).",
          "NoEcho":"true",
          "MinLength":"8",
-         "AllowedPattern":"[^\\\\\"/@]*$",
-         "ConstraintDescription":"Constraints: At least 8 printable ASCII characters. Cannot contain any of the following: / (slash), (double quote) and @ (at sign)."
+         "MaxLength":"128",
+         "AllowedPattern":"^(((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[A-Z])(?=.*[~`!#$%^&*()_\\-+=\\[\\{\\]\\}\\\\|;:,<.>?]))|((?=.*[a-z])(?=.*[0-9])(?=.*[~`!#$%^&*()_\\-+=\\[\\{\\]\\}\\\\|;:,<.>?]))|((?=.*[A-Z])(?=.*[0-9])(?=.*[~`!#$%^&*()_\\-+=\\[\\{\\]\\}\\\\|;:,<.>?])))[\\w~`!#$%^&*()_\\-+=\\[\\{\\]\\}\\\\|;:,<.>?]{8,128}$",
+         "ConstraintDescription":"Your password must be at least 8 characters in length. Your password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.) except of: @ (at sign), / (slash), ' (single quote), and \" (double quote)."
       }
    },
    "Metadata":{
@@ -295,16 +296,16 @@
                {
                   "Description":"RDP",
                   "IpProtocol":"tcp",
-                  "FromPort":"3389",
-                  "ToPort":"3389",
+                  "FromPort":3389,
+                  "ToPort":3389,
                   "CidrIp":{
                      "Ref":"ServerAccesslocation"
                   }
                },
                {
                   "IpProtocol":"tcp",
-                  "FromPort":"443",
-                  "ToPort":"443",
+                  "FromPort":443,
+                  "ToPort":443,
                   "CidrIp":"0.0.0.0/0"
                }
             ],
@@ -337,40 +338,40 @@
             "SecurityGroupIngress":[
                {
                   "IpProtocol":"tcp",
-                  "FromPort":"3389",
-                  "ToPort":"3389",
+                  "FromPort":3389,
+                  "ToPort":3389,
                   "CidrIp":{
                      "Ref":"ServerAccesslocation"
                   }
                },
                {
                   "IpProtocol":"tcp",
-                  "FromPort":"1801",
-                  "ToPort":"1801",
+                  "FromPort":1801,
+                  "ToPort":1801,
                   "CidrIp":{
                      "Ref":"ScalabilityAccessLocation"
                   }
                },
                {
                   "IpProtocol":"tcp",
-                  "FromPort":"5671",
-                  "ToPort":"5671",
+                  "FromPort":5671,
+                  "ToPort":5671,
                   "CidrIp":{
                      "Ref":"ScalabilityAccessLocation"
                   }
                },
                {
                   "IpProtocol":"tcp",
-                  "FromPort":"17777",
-                  "ToPort":"17777",
+                  "FromPort":17777,
+                  "ToPort":17777,
                   "CidrIp":{
                      "Ref":"ScalabilityAccessLocation"
                   }
                },
                {
                   "IpProtocol":"tcp",
-                  "FromPort":"443",
-                  "ToPort":"443",
+                  "FromPort":443,
+                  "ToPort":443,
                   "CidrIp":"0.0.0.0/0"
                }
             ],
@@ -429,6 +430,105 @@
                            ]
                         }
                      },
+                     "C:\\cfn\\artifacts\\InstallerConfig.xml":{
+                        "content":{
+                           "Fn::Join":[
+                              "",
+                              [
+                                "<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\">",
+                                 "<Obj RefId=\"0\">",
+                                    "<TN RefId=\"0\">",
+                                       "<T>System.Collections.Hashtable</T>",
+                                       "<T>System.Object</T>",
+                                    "</TN>",
+                                    "<DCT>",
+                                       "<En>",
+                                       "<S N=\"Key\">databaseName</S>",
+                                       "<S N=\"Value\">",
+                                       {
+                                          "Fn::Join":[ "&lt;", { "Fn::Split": [ "<", { 
+                                             "Fn::Join" : [ "&amp;", { "Fn::Split": [ "&", { "Ref":"DBNameParameter" } ]}] 
+                                          }]}] 
+                                       },
+                                       "</S>",
+                                       "</En>",
+                                       "<En>",
+                                       "<S N=\"Key\">eocproduct</S>",
+                                       "<S N=\"Value\">", { "Fn::If": [ "isEOCProduct", "EOC", "" ] }, "</S>",
+                                       "</En>",
+                                       "<En>",
+                                       "<S N=\"Key\">appUserPassword</S>",
+                                       "<S N=\"Value\">",
+                                       {
+                                          "Fn::Join":[ "&lt;", { "Fn::Split": [ "<", { 
+                                             "Fn::Join" : [ "&amp;", { "Fn::Split": [ "&", { "Ref":"Password" } ]}] 
+                                          }]}] 
+                                       },   
+                                       "</S>",
+                                       "</En>",
+                                       "<En>",
+                                       "<S N=\"Key\">dbServerName</S>",
+                                       "<S N=\"Value\">",
+                                       {
+                                          "Fn::If":[
+                                             "isExistingDatabase",
+                                             {
+                                                "Fn::Join":[ "&lt;", { "Fn::Split": [ "<", { 
+                                                   "Fn::Join" : [ "&amp;", { "Fn::Split": [ "&", { "Ref":"DBServerNameParameter" } ]}] 
+                                                }]}] 
+                                             },
+                                             {
+                                                "Fn::GetAtt":[
+                                                   "SolarWindsDatabase",
+                                                   "Endpoint.Address"
+                                                ]
+                                             }
+                                          ]
+                                       }
+                                       ,   
+                                       "</S>",
+                                       "</En>",
+                                       "<En>",
+                                       "<S N=\"Key\">awsStackRegion</S>",
+                                       "<S N=\"Value\">", { "Ref":"AWS::Region" } ,"</S>",
+                                       "</En>",
+                                       "<En>",
+                                       "<S N=\"Key\">awsStackName</S>",
+                                       "<S N=\"Value\">", 
+                                       {
+                                          "Fn::Join":[ "&lt;", { "Fn::Split": [ "<", { 
+                                             "Fn::Join" : [ "&amp;", { "Fn::Split": [ "&", { "Ref":"AWS::StackId" } ]}] 
+                                          }]}] 
+                                       },
+                                       "</S>",
+                                       "</En>",
+                                       "<En>",
+                                       "<S N=\"Key\">dbPassword</S>",
+                                       "<S N=\"Value\">", 
+                                       {
+                                          "Fn::Join":[ "&lt;", { "Fn::Split": [ "<", { 
+                                             "Fn::Join" : [ "&amp;", { "Fn::Split": [ "&", { "Ref":"DBPassword" } ]}] 
+                                          }]}] 
+                                       },         
+                                       "</S>",
+                                       "</En>",
+                                       "<En>",
+                                       "<S N=\"Key\">dbUserName</S>",
+                                       "<S N=\"Value\">", 
+                                       {
+                                          "Fn::Join":[ "&lt;", { "Fn::Split": [ "<", { 
+                                             "Fn::Join" : [ "&amp;", { "Fn::Split": [ "&", { "Ref":"DBUserName" } ]}] 
+                                          }]}] 
+                                       },         
+                                       "</S>",
+                                       "</En>",
+                                    "</DCT>",
+                                 "</Obj>",
+                                 "</Objs>"
+                              ]
+                           ]
+                        }
+                     },
                      "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf":{
                         "content":{
                            "Fn::Join":[
@@ -470,72 +570,7 @@
                           "Fn::Join":[
                              "",
                              [
-                                "powershell.exe -ExecutionPolicy RemoteSigned C:\\cfn\\artifacts\\Populate-silent-config-file.ps1 ",
-                                "-templateParameters @{",
-                                "dbServerName = ",
-                                "'",
-                                {
-                                   "Fn::If":[
-                                      "isExistingDatabase",
-                                      {
-                                         "Ref":"DBServerNameParameter"
-                                      },
-                                      {
-                                         "Fn::GetAtt":[
-                                            "SolarWindsDatabase",
-                                            "Endpoint.Address"
-                                         ]
-                                      }
-                                   ]
-                                },
-                                "'",
-                                "; databaseName = ",
-                                "'",
-                                {
-                                   "Ref":"DBNameParameter"
-                                },
-                                "'",
-                                "; dbUserName = ",
-                                "'",
-                                {
-                                   "Ref":"DBUserName"
-                                },
-                                "'",
-                                "; dbPassword = ",
-                                "'",
-                                {
-                                   "Ref":"DBPassword"
-                                },
-                                "'",
-                                "; appUserPassword = ",
-                                "'",
-                                {
-                                   "Ref":"Password"
-                                },
-                                "'",
-                                 "; eocproduct = ",
-                                 "'",
-                                 {
-                                    "Fn::If": [
-                                    "isEOCProduct",
-                                    "EOC",
-                                    {
-                                       "Ref":"AWS::NoValue"
-                                    }
-                                    ]
-                                 }, "'",
-                                 "; awsStackName = ",
-                                 "'",
-                                 {
-                                    "Ref":"AWS::StackName"
-                                 }, "'",
-                                 "; awsStackRegion = ",
-                                 "'",
-                                 {
-                                    "Ref": "AWS::Region"
-                                 }, "'",
-
-                                "}"
+                                "powershell.exe -ExecutionPolicy RemoteSigned C:\\cfn\\artifacts\\Populate-silent-config-file.ps1 "
                              ]
                           ]
                        },
@@ -591,32 +626,27 @@
             "SubnetId":{
                "Ref":"Subnet"
             },
-            "BlockDeviceMappings":[
-               {
+            "BlockDeviceMappings": { "Fn::If": [ "isVolumeTypeGP2", 
+               [{
                   "DeviceName":"/dev/sda1",
                   "Ebs":{
-                     "VolumeType":{
-                        "Fn::If":[
-                           "isVolumeTypeGP2",
-                           "gp2",
-                           "io1"
-                        ]
-                     },
+                     "VolumeType": "gp2",
+                     "VolumeSize":{
+                        "Ref":"VolumeSize"
+                     }
+                  }
+               }],
+               [{
+                  "DeviceName":"/dev/sda1",
+                  "Ebs":{
+                     "VolumeType": "io1",
                      "VolumeSize":{
                         "Ref":"VolumeSize"
                      },
-                     "Iops":{
-                        "Fn::If":[
-                           "isVolumeTypeGP2",
-                           {
-                              "Ref":"AWS::NoValue"
-                           },
-                           "1500"
-                        ]
-                     }
+                     "Iops": 1500
                   }
-               }
-            ],
+               }]]
+            },
             "UserData":{
                "Fn::Base64":{
                   "Fn::Join":[
@@ -654,10 +684,10 @@
             "AllocatedStorage":{
                "Ref":"AllocatedStorage"
             },
-            "DBInstanceClass":"db.m4.large",
+            "DBInstanceClass":"db.m5.large",
             "Port":"1433",
             "StorageType":"gp2",
-            "BackupRetentionPeriod":"7",
+            "BackupRetentionPeriod": 7,
             "DBName":"",
             "DBSubnetGroupName": {
              "Ref": "DatabaseSubnetGroup"
@@ -669,7 +699,7 @@
                "Ref":"DBPassword"
             },
             "Engine":"sqlserver-se",
-            "EngineVersion":"13.00.4422.0.v1",
+            "EngineVersion":"15.00.4043.16.v1",
             "LicenseModel":"license-included",
             "VPCSecurityGroups" : [ { "Ref" : "rdsDBSecurityGroup" }  ],
             "Tags": [
@@ -716,16 +746,16 @@
                "isScalabilityRequired",
                {
                 "IpProtocol":"tcp",
-                "FromPort":"1433",
-                "ToPort":"1433",
+                "FromPort": 1433,
+                "ToPort": 1433,
              "SourceSecurityGroupId": {
                    "Ref": "EC2ScalabilitySecurityGroup"
                  }
                },
                {
                 "IpProtocol":"tcp",
-                "FromPort":"1433",
-                "ToPort":"1433",
+                "FromPort": 1433,
+                "ToPort": 1433,
              "SourceSecurityGroupId": {
                    "Ref": "NonScalableSecurityGroup"
                  }
@@ -758,68 +788,84 @@
    "Mappings":{
       "RegionMap":{
          "us-east-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "us-east-2":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "us-west-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "us-west-2":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
+         },
+         "af-south-1":{
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
+         },
+         "ap-east-1":{
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "ap-south-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "ap-northeast-2":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "ap-southeast-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "ap-southeast-2":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "ap-northeast-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "ca-central-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "eu-central-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
+         },
+         "eu-south-1":{
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "eu-west-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "eu-west-2":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "eu-west-3":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "eu-north-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
+         },
+         "me-south-1":{
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          },
          "sa-east-1":{
-            "Windows2016":"ami-0fd514fcda314f145",
-            "Windows2019":"ami-074bfc9188e9e0245"
+            "Windows2016":"ami-0411c423070cd964c",
+            "Windows2019":"ami-012264d2a8078caec"
          }
       }
    },
@@ -830,14 +876,6 @@
                "Ref":"WindowOSTypeParameter"
             },
             "Windows Server 2016 Datacenter"
-         ]
-      },
-      "isWindow2019":{
-         "Fn::Equals":[
-            {
-               "Ref":"WindowOSTypeParameter"
-            },
-            "Windows Server 2019 Datacenter"
          ]
       },
       "isScalabilityRequired":{
